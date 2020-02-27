@@ -1,0 +1,57 @@
+service: ${opt:service, 'bolt-java-app'} # NOTE: update this with your service name
+plugins:
+provider:
+  name: aws
+  runtime: java8
+  stage: ${opt:stage, 'dev'}
+  region: ap-northeast-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:PutObject
+        - s3:DeleteObject
+      Resource: "arn:aws:s3:::${env:SLACK_APP_AMAZON_S3_BUCKET}/*"
+
+  environment:
+    SERVERLESS_SERVICE: ${opt:service, 'bolt-java-app'}
+    SERVERLESS_STAGE: ${opt:stage, 'dev'}
+    SLACK_APP_CLIENT_ID: ${env:SLACK_APP_CLIENT_ID}
+    SLACK_APP_CLIENT_SECRET: ${env:SLACK_APP_CLIENT_SECRET}
+    SLACK_SIGNING_SECRET: ${env:SLACK_SIGNING_SECRET}
+    SLACK_APP_OAUTH_START_PATH: ${env:SLACK_APP_OAUTH_START_PATH}
+    SLACK_APP_OAUTH_CALLBACK_PATH: ${env:SLACK_APP_OAUTH_CALLBACK_PATH}
+    SLACK_APP_AMAZON_S3_BUCKET: ${env:SLACK_APP_AMAZON_S3_BUCKET}
+    SLACK_APP_REDIRECT_URI: ${env:SLACK_APP_REDIRECT_URI}
+
+package:
+  artifact: target/bolt-java-app-1.0.jar
+
+functions:
+  warmup:
+    handler: hello.aws.WarmupHandler
+    timeout: 120 # optional, in seconds, default is 6
+    events:
+      - schedule: rate(5 minutes)
+  api:
+    handler: hello.aws.SlackApiHandler
+    timeout: 20 # optional, in seconds, default is 6
+    events:
+      - http:
+          path: slack/events
+          method: post
+  oauth:
+    handler: hello.aws.SlackOAuthHandler
+    timeout: 20 # optional, in seconds, default is 6
+    events:
+      - http:
+          path: slack/oauth/start
+          method: get
+      - http:
+          path: slack/oauth/callback
+          method: get

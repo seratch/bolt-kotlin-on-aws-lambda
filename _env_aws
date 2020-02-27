@@ -1,0 +1,9 @@
+export SERVERLESS_SERVICE=bolt-java-app
+export SERVERLESS_STAGE=prod
+export SLACK_APP_CLIENT_ID=123.123
+export SLACK_APP_CLIENT_SECRET=random
+export SLACK_SIGNING_SECRET=random
+export SLACK_APP_OAUTH_START_PATH=/prod/slack/oauth/start
+export SLACK_APP_OAUTH_CALLBACK_PATH=/prod/slack/oauth/callback
+export SLACK_APP_REDIRECT_URI=https://xxx.amazonaws.com/dev/slack/oauth/callback
+export SLACK_APP_AMAZON_S3_BUCKET=unique-bucket-name

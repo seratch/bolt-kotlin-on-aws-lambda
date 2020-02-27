@@ -1,0 +1,14 @@
+{
+  "name": "bolt-java-on-aws-lambda",
+  "version": "1.0.0",
+  "description": "Bolt Java app on AWS API Gateway/Lambda",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@seratch",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^1.64.1"
+  }
+}

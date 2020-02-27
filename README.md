@@ -31,7 +31,27 @@ aws configure
 
 ## Slack App Configuration
 
-https://api.slack.com/apps
+Configure the followings [here](https://api.slack.com/apps).
+
+* **App Home**
+  * Turn "Home Tab" On
+* **Interactive Components**
+  * Turn "Interactivity" On
+  * Set the "Request URL" with the valid "Request URL" below
+* **Slash Commands**
+  * Add `/make-request` command with the valid "Request URL" below
+* **OAuth & Permissions**
+  * Add a "Redirect URL" with the valid "Redirect URL" below
+  * Scopes > Bot Token Scopes
+    * app_mentions:read
+    * chat:write
+    * commands
+* **Event Subscriptions**
+  * Turn "Enable Events" On
+  * Set the "Request URL" with the valid "Request URL" below
+  * Subscribe to bot events
+    * app_home_opened
+    * app_mention
 
 The "Request URL" would be:
 * Local: `https://{your domain}.ngrok.io/slack/events`
@@ -41,25 +61,6 @@ The "Redirect URL" would be:
 * Local: `https://{your domain}.ngrok.io/slack/oauth/callback`
 * AWS: `https://{your domain].amazonaws.com/${SERVERLESS_STAGE}/oauth/callback`
 
-* App Home
-  * Turn "Home Tab" On
-* Interactive Components
-  * Turn "Interactivity" On
-  * Set the "Request URL" with the valid "Request URL" above
-* Slash Commands
-  * Add `/make-request` command with the valid "Request URL" above
-* OAuth & Permissions
-  * Add a "Redirect URL" with the valid "Redirect URL" above
-  * Scopes > Bot Token Scopes
-    * app_mentions:read
-    * chat:write
-    * commands
-* Event Subscriptions
-  * Turn "Enable Events" On
-  * Set the "Request URL" with the valid "Request URL" above
-  * Subscribe to bot events
-    * app_home_opened
-    * app_mention
 
 ## Local Development
 

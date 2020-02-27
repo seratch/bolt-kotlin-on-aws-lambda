@@ -4,7 +4,7 @@ This is a sample project for building [Bolt Java (still in beta)](https://github
 
 On your local machine, I recommend running the app with the [Quarkus](https://quarkus.io/) framework (specifically using the [quarkus-undertow](https://quarkus.io/guides/http-reference)). You'll enjoy all the benefits of [Quarkus's development mode](https://quarkus.io/guides/getting-started). 
 
-Once you make sure if your app works as expected, it's time to deploy the app onto [AWS API Gateway](https://aws.amazon.com/api-gateway/) / [Lambda](https://aws.amazon.com/lambda/)! Just running `./deploy.sh` does everything for you. The shell script internally runs `maven shade:shade` to build a uber jar that runs on the cloud, applies Cloud Formation for preparing all the resources, and then deploy the app as Lambda functions.
+Once you make sure if your app works as expected, it's time to deploy the app onto [AWS API Gateway](https://aws.amazon.com/api-gateway/) / [Lambda](https://aws.amazon.com/lambda/)! Just running `./deploy.sh` does everything for you. The shell script internally runs `maven shade:shade` to build a uber jar that runs on the cloud, applies Cloud Formation for preparing all the resources, and then deploys the app as Lambda functions.
 
 ## Prerequisites
 

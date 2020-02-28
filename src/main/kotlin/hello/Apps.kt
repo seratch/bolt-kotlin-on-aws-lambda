@@ -86,7 +86,6 @@ class Apps {
                                 button { b -> b.actionId("home_button_1").text(plainText("Create New Task")).style("primary").value("create_task") },
                                 button { b -> b.actionId("home_button_2").text(plainText("Create New Project")).value("create_project") },
                                 button { b -> b.actionId("home_button_3").text(plainText("Help")).value("help") }
-
                         ))
                     },
                     context { c ->

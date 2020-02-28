@@ -2,7 +2,7 @@ service: ${opt:service, 'bolt-java-app'} # NOTE: update this with your service n
 plugins:
 provider:
   name: aws
-  runtime: java8
+  runtime: java11
   stage: ${opt:stage, 'dev'}
   region: ap-northeast-1
   iamRoleStatements:

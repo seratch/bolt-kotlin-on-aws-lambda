@@ -6,13 +6,13 @@ On your local machine, I recommend running the app with the [Quarkus](https://qu
 
 Once you make sure if your app works as expected, it's time to deploy the app onto [AWS API Gateway](https://aws.amazon.com/api-gateway/) / [Lambda](https://aws.amazon.com/lambda/)! Just running `./deploy.sh` does everything for you. The shell script internally runs `maven shade:shade` to build a uber jar that runs on the cloud, applies Cloud Formation for preparing all the resources, and then deploys the app as Lambda functions.
 
-## Prerequisites
+## Required Tools
 
-* [Serverless Framework](https://serverless.com/) (`serverless`, `sls`)
-* [Python 3](https://www.python.org/) (`python3`, `pip3`)
-* [AWS CLI](https://aws.amazon.com/cli/) (`aws`)
 * [OpenJDK 8 or 11](https://openjdk.java.net/install/) (`java`, `javac`)
-* [Maven 3](https://maven.apache.org/) (`mvn`)
+  * [Maven 3](https://maven.apache.org/) (`mvn`)
+* [Serverless Framework](https://serverless.com/) (`serverless`, `sls`)
+  * [AWS CLI](https://aws.amazon.com/cli/) (`aws`)
+  * [Python 3](https://www.python.org/) (`python3`, `pip3`)
 
 ```
 # install JDK, Maven (mvn command)
@@ -28,6 +28,16 @@ python3 get-pip.py --user
 pip3 install awscli --upgrade --user
 aws configure
 ```
+
+## AWS Resources
+
+The only thing you need to manually do is to create an S3 bucket for storing OAuth state values and bot/user tokens. Needless to say, please be careful with its access permissions.
+
+```
+export SLACK_APP_AMAZON_S3_BUCKET=your-own-unique-bucket-name
+```
+
+Apart from it, everything will be done by Serverless Framework's Cloud Formation tasks!
 
 ## Slack App Configuration
 

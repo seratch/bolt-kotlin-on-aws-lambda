@@ -81,10 +81,9 @@ class Apps {
 
         app.blockAction(Pattern.compile("home_button_\\d+")) { req, ctx ->
             ctx.logger.info("payload: ${req.payload}")
-            val res = ctx.client().viewsOpen {
-                it.triggerId(req.payload.triggerId).view(view { view ->
-                    view
-                            .callbackId("home_button_click_event")
+            val res = ctx.client().viewsOpen { r ->
+                r.triggerId(req.payload.triggerId).view(view { v ->
+                    v.callbackId("home_button_click_event")
                             .type("modal")
                             .title(viewTitle { t -> t.type("plain_text").text("Click Event") })
                             .close(viewClose { c -> c.type("plain_text").text("Close") })
@@ -114,8 +113,7 @@ class Apps {
                             .accessory(externalSelect { s ->
                                 s.actionId("select-action").minQueryLength(0)
                             })
-                }
-                ))
+                }))
             } else {
                 ctx.ack(":x: Failed to open a modal (error: ${viewsOpenResult.error})")
             }

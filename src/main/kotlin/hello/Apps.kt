@@ -7,6 +7,8 @@ import com.slack.api.bolt.response.Responder
 import com.slack.api.bolt.service.InstallationService
 import com.slack.api.bolt.service.builtin.AmazonS3InstallationService
 import com.slack.api.bolt.service.builtin.AmazonS3OAuthStateService
+import com.slack.api.model.Action
+import com.slack.api.model.Attachments.*
 import com.slack.api.model.block.Blocks.*
 import com.slack.api.model.block.composition.BlockCompositions.markdownText
 import com.slack.api.model.block.composition.BlockCompositions.plainText
@@ -215,6 +217,43 @@ class Apps {
                     DialogOption.builder().label("Standard").value("std").build()
             )
             ctx.ack { it.options(options) }
+        }
+
+        // -------------------------------
+        // Attachments
+        // -------------------------------
+        app.command("/test-attachments") { _, ctx ->
+            val attachments = listOf(
+                    attachment {
+                        it.text("Choose a game to play")
+                                .fallback("You are unable to choose a game")
+                                .callbackId("wopr_game")
+                                .color("#3AA3E3")
+                                .actions(asActions(
+                                        action { a -> a.name("game").text("Chess").type(Action.Type.BUTTON).value("chess") },
+                                        action { a -> a.name("game").text("Falken's Maze").type(Action.Type.BUTTON).value("maze") },
+                                        action { a ->
+                                            a.name("game")
+                                                    .text("Thermonuclear War")
+                                                    .type(Action.Type.BUTTON)
+                                                    .style("danger")
+                                                    .value("war")
+                                                    .confirm(confirm { c ->
+                                                        c.title("Are you sure?")
+                                                                .text("Wouldn't you prefer a good game of chess?")
+                                                                .okText("Yes")
+                                                                .dismissText("No")
+                                                    })
+                                        }
+                                ))
+                    }
+            )
+            ctx.ack { it.attachments(attachments) }
+        }
+
+        app.attachmentAction("wopr_game") { req, ctx ->
+            ctx.respond("Sent actions: ${req.payload.actions}")
+            ctx.ack()
         }
 
         return app

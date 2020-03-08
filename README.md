@@ -48,20 +48,24 @@ Configure the followings [here](https://api.slack.com/apps).
 * **Interactive Components**
   * Turn "Interactivity" On
   * Set the "Request URL" with the valid "Request URL" below
+  * Set the "Request URL" with the valid "Request URL" below
 * **Slash Commands**
-  * Add `/make-request` command with the valid "Request URL" below
+  * Add `/time` command with the valid "Request URL" below
+  * Add an action with callback id: `test-message-action`
+  * Set the valid "Request URL" below for Select Menus's Options Load URL
 * **OAuth & Permissions**
   * Add a "Redirect URL" with the valid "Redirect URL" below
   * Scopes > Bot Token Scopes
     * app_mentions:read
     * chat:write
+    * chat:write.public
     * commands
 * **Event Subscriptions**
   * Turn "Enable Events" On
   * Set the "Request URL" with the valid "Request URL" below
   * Subscribe to bot events
-    * app_home_opened
-    * app_mention
+    * `app_home_opened`
+    * `app_mention`
 
 The "Request URL" would be:
 * Local: `https://{your domain}.ngrok.io/slack/events`

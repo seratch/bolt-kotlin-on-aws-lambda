@@ -1,5 +1,6 @@
 package hello
 
+import com.slack.api.app_backend.interactive_components.response.Option
 import com.slack.api.bolt.App
 import com.slack.api.bolt.AppConfig
 import com.slack.api.bolt.response.Responder
@@ -15,7 +16,11 @@ import com.slack.api.model.event.AppHomeOpenedEvent
 import com.slack.api.model.event.AppMentionEvent
 import com.slack.api.model.view.View
 import com.slack.api.model.view.Views.*
+import java.net.URLDecoder
+import java.time.ZonedDateTime
+import java.util.*
 import java.util.regex.Pattern
+import com.slack.api.app_backend.dialogs.response.Option as DialogOption
 
 class Apps {
 
@@ -26,6 +31,35 @@ class Apps {
         val app = App()
         app.service(installationService)
 
+        // -------------------------------
+        // Middleware
+        // -------------------------------
+
+        app.use { req, _, chain ->
+            val body = req.requestBodyAsString
+            val payload = if (body.startsWith("payload=")) {
+                URLDecoder.decode(body.split("payload=")[1], "UTF-8")
+            } else body
+            req.context.logger.info(payload)
+            chain.next(req)
+        }
+
+        // -------------------------------
+        // Slash Commands
+        // -------------------------------
+
+        app.command("/time") { req, ctx ->
+            val input = req.payload.text
+            val tz = if (input == null || input.isEmpty()) TimeZone.getDefault() else
+                TimeZone.getTimeZone(req.payload.text)
+            val reply = ZonedDateTime.now(tz.toZoneId()).toString()
+            ctx.ack { it.text(reply) }
+        }
+
+        // -------------------------------
+        // Events API
+        // -------------------------------
+
         app.event(AppMentionEvent::class.java) { req, ctx ->
             if (req.event.text.contains("ping")) {
                 ctx.say("<@${req.event.user}> pong!")
@@ -33,26 +67,55 @@ class Apps {
             ctx.ack()
         }
 
+        // -------------------------------
+        // Home tab
+        // -------------------------------
+
         app.event(AppHomeOpenedEvent::class.java) { req, ctx ->
-            val res = ctx.client().viewsPublish { it.userId(req.event.user).view(homeView()) }
-            if (!res.isOk) {
-                ctx.logger.warn("Failed to update Home tab for user: ${req.event.user}")
+            val res = ctx.client().viewsPublish {
+                it.userId(req.event.user).view(homeView())
             }
+            if (!res.isOk) ctx.logger.warn("Failed to update Home tab for user: ${req.event.user}")
             ctx.ack()
         }
 
         app.blockAction(Pattern.compile("home_button_\\d+")) { req, ctx ->
             ctx.logger.info("payload: ${req.payload}")
+            val res = ctx.client().viewsOpen {
+                it.triggerId(req.payload.triggerId).view(view { view ->
+                    view
+                            .callbackId("home_button_click_event")
+                            .type("modal")
+                            .title(viewTitle { t -> t.type("plain_text").text("Click Event") })
+                            .close(viewClose { c -> c.type("plain_text").text("Close") })
+                            .blocks(asBlocks(section { s -> s.text(plainText("You clicked a button!")) }))
+                            .notifyOnClose(true)
+                })
+            }
+            if (!res.isOk) ctx.logger.info(res.toString())
+            ctx.ack()
+        }
+        app.viewClosed("home_button_click_event") { _, ctx ->
             ctx.ack()
         }
 
-        app.command("/make-request") { req, ctx ->
+        // -------------------------------
+        // Modals
+        // -------------------------------
+
+        app.command("/test-modal") { req, ctx ->
             val privateMetadata = req.payload.responseUrl
             val viewsOpenResult = ctx.client().viewsOpen {
                 it.triggerId(req.payload.triggerId).view(modalView(privateMetadata))
             }
             if (viewsOpenResult.isOk) {
-                ctx.ack()
+                ctx.ack(asBlocks(section {
+                    it.text(markdownText("test"))
+                            .accessory(externalSelect { s ->
+                                s.actionId("select-action").minQueryLength(0)
+                            })
+                }
+                ))
             } else {
                 ctx.ack(":x: Failed to open a modal (error: ${viewsOpenResult.error})")
             }
@@ -72,6 +135,88 @@ class Apps {
                 }
                 ctx.ack()
             }
+        }
+
+        val allOptions: List<Option> = listOf(
+                Option(plainText("Schedule", true), "schedule"),
+                Option(plainText("Budget", true), "budget"),
+                Option(plainText("Assignment", true), "assignment")
+        )
+        app.blockSuggestion("select-action") { _, ctx ->
+            ctx.ack { it.options(allOptions) }
+        }
+
+        app.blockAction("select-action") { req, ctx ->
+            ctx.respond("You chose ${req.payload.actions[0].selectedOption}!")
+            ctx.ack()
+        }
+
+        app.viewClosed("request-modal") { _, ctx ->
+            ctx.ack()
+        }
+
+        // -------------------------------
+        // Message Action
+        // -------------------------------
+
+        app.messageAction("test-message-action") { _, ctx ->
+            ctx.respond("Thanks!")
+            ctx.ack()
+        }
+
+        // -------------------------------
+        // Dialogs
+        // -------------------------------
+
+        app.command("/test-dialog") { req, ctx ->
+            val result = ctx.client().dialogOpen {
+                it.triggerId(req.payload.triggerId).dialogAsString("""
+                {
+                  "callback_id": "dialog-test",
+                  "title": "Request a Ride",
+                  "submit_label": "Request",
+                  "notify_on_cancel": true,
+                  "state": "Limo",
+                  "elements": [
+                    {
+                      "type": "text",
+                      "label": "Pickup Location",
+                      "name": "loc_origin"
+                    },
+                    {
+                      "type": "text",
+                      "label": "Dropoff Location",
+                      "name": "loc_destination"
+                    },
+                    {
+                      "type": "select",
+                      "label": "Price",
+                      "name": "price_list",
+                      "data_source": "external",
+                      "min_query_length": 1
+                    }
+                  ]
+                }
+            """.trimIndent())
+            }
+            if (result.isOk) ctx.ack()
+            else ctx.ack(":x: Failed to open a dialog (error: ${result.error})")
+        }
+
+        app.dialogCancellation("dialog-test") { req, ctx ->
+            ctx.respond { it.text("```${req.payload}```") }
+            ctx.ack()
+        }
+        app.dialogSubmission("dialog-test") { req, ctx ->
+            ctx.respond { it.text("```${req.payload.submission}```") }
+            ctx.ack()
+        }
+        app.dialogSuggestion("dialog-test") { _, ctx ->
+            val options = listOf(
+                    DialogOption.builder().label("Premium").value("prm").build(),
+                    DialogOption.builder().label("Standard").value("std").build()
+            )
+            ctx.ack { it.options(options) }
         }
 
         return app
@@ -115,6 +260,7 @@ class Apps {
                     .title(viewTitle { t -> t.type("plain_text").text("Request Form") })
                     .submit(viewSubmit { s -> s.type("plain_text").text("Submit") })
                     .close(viewClose { c -> c.type("plain_text").text("Cancel") })
+                    .notifyOnClose(true)
                     .privateMetadata(privateMetadata)
                     .blocks(asBlocks(input { i ->
                         i.blockId("request-block").element(
@@ -128,7 +274,7 @@ class Apps {
 
     fun oauthApp(): App {
         val config = AppConfig.builder()
-                .scope("app_mentions:read,commands,chat:write")
+                .scope("commands,app_mentions:read,chat:write,chat:write.public")
                 .oauthCompletionUrl("https://example.com/thank-you")
                 .oauthCancellationUrl("https://example.com/something-wrong")
                 .build()

@@ -22,6 +22,6 @@ fi
 
 export SLS_DEBUG=*
 
-mvn clean package shade:shade &&
+mvn -f pom_aws.xml clean package shade:shade &&
   ./node_modules/serverless/bin/serverless deploy --stage ${SERVERLESS_STAGE} -v &&
   ./node_modules/serverless/bin/serverless invoke --stage ${SERVERLESS_STAGE} --function warmup

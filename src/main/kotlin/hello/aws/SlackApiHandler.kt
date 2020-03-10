@@ -6,11 +6,11 @@ import com.slack.api.bolt.aws_lambda.request.ApiGatewayRequest
 import hello.Apps
 
 class SlackApiHandler(app: App?) : SlackApiLambdaHandler(app) {
-    constructor() : this(Apps().apiApp())
+  constructor() : this(Apps().apiApp())
 
-    override fun isWarmupRequest(awsReq: ApiGatewayRequest?): Boolean {
-        return awsReq != null
-                && awsReq.body != null
-                && awsReq.body == "warmup=true"
-    }
+  override fun isWarmupRequest(awsReq: ApiGatewayRequest?): Boolean {
+    return awsReq != null
+      && awsReq.body != null
+      && awsReq.body == "warmup=true"
+  }
 }

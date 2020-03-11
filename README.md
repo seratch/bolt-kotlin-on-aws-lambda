@@ -48,11 +48,10 @@ Configure the followings [here](https://api.slack.com/apps).
 * **Interactive Components**
   * Turn "Interactivity" On
   * Set the "Request URL" with the valid "Request URL" below
-  * Set the "Request URL" with the valid "Request URL" below
-* **Slash Commands**
-  * Add `/time` command with the valid "Request URL" below
   * Add an action with callback id: `test-message-action`
   * Set the valid "Request URL" below for Select Menus's Options Load URL
+* **Slash Commands**
+  * Add `/time`, `/test-modal`, `/test-dialog`, `/test-attachments` with the valid "Request URL" below
 * **OAuth & Permissions**
   * Add a "Redirect URL" with the valid "Redirect URL" below
   * Scopes > Bot Token Scopes

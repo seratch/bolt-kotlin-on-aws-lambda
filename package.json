@@ -9,6 +9,6 @@
   "author": "@seratch",
   "license": "MIT",
   "devDependencies": {
-    "serverless": "^1.65.0"
+    "serverless": "^1.66.0"
   }
 }

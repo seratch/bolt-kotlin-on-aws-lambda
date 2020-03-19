@@ -128,10 +128,20 @@ class Apps {
       } else if (request.length < 10) {
         ctx.ackWithErrors(mapOf("request-block" to "must have more than 10 characters"))
       } else {
-        val responseUrl = req.payload.view.privateMetadata
-        val apiResponse = Responder(ctx.slack, responseUrl).sendToCommand { it.text(request) }
-        if (apiResponse.code != 200) {
-          ctx.logger.error("Failed to send a message (error: ${apiResponse.message})")
+        if (req.payload.responseUrls.isEmpty()) {
+          // response_url from slash command
+          val responseUrl = req.payload.view.privateMetadata
+          if (responseUrl != null && responseUrl.isNotEmpty()) {
+            val apiResponse = Responder(ctx.slack, responseUrl).sendToCommand { it.text(request) }
+            if (apiResponse.code != 200) {
+              ctx.logger.error("Failed to send a message (error: ${apiResponse.message})")
+            }
+          }
+        } else {
+          val apiResponse = ctx.respond(request)
+          if (apiResponse.code != 200) {
+            ctx.logger.error("Failed to send a message (error: ${apiResponse.message})")
+          }
         }
         ctx.ack()
       }
@@ -156,10 +166,20 @@ class Apps {
     }
 
     // -------------------------------
-    // Message Action
+    // Shortcuts
     // -------------------------------
 
-    app.messageAction("test-message-action") { _, ctx ->
+    app.globalShortcut("test-global-shortcut") { req, ctx ->
+      val viewsOpenResult = ctx.client().viewsOpen {
+        it.triggerId(req.payload.triggerId).view(modalView(""))
+      }
+      if (!viewsOpenResult.isOk) {
+        ctx.logger.warn("Failed to open a modal (error: ${viewsOpenResult.error}")
+      }
+      ctx.ack()
+    }
+
+    app.messageShortcut("test-message-action") { _, ctx ->
       ctx.respond("Thanks!")
       ctx.ack()
     }
@@ -300,13 +320,24 @@ class Apps {
         .close(viewClose { c -> c.type("plain_text").text("Cancel") })
         .notifyOnClose(true)
         .privateMetadata(privateMetadata)
-        .blocks(asBlocks(input { i ->
-          i.blockId("request-block").element(
-            plainTextInput { p ->
-              p.actionId("request-action").multiline(true)
-            }
-          ).label(plainText { p -> p.text("Detailed Request") })
-        }))
+        .blocks(asBlocks(
+          input { i ->
+            i.blockId("request-block").element(
+              plainTextInput { p ->
+                p.actionId("request-action").multiline(true)
+              }
+            ).label(plainText { p -> p.text("Detailed Request") })
+          },
+          input { i ->
+            i.blockId("channel-block").element(
+              channelsSelect { cs ->
+                cs.actionId("channel-action")
+                  .responseUrlEnabled(true)
+              }
+            ).label(plainText { p -> p.text("Notification") })
+              .optional(true)
+          }
+        ))
     }
   }
 
@@ -317,6 +348,10 @@ class Apps {
       .oauthCancellationUrl("https://example.com/something-wrong")
       .build()
     val app = App(config)
+    app.use { req, _, chain ->
+      req.context.logger.info(req.requestBodyAsString)
+      chain.next(req)
+    }
     app.asOAuthApp(true)
     app.service(installationService)
     app.service(AmazonS3OAuthStateService(System.getenv("SLACK_APP_AMAZON_S3_BUCKET")))

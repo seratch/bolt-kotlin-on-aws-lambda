@@ -48,7 +48,9 @@ Configure the followings [here](https://api.slack.com/apps).
 * **Interactive Components**
   * Turn "Interactivity" On
   * Set the "Request URL" with the valid "Request URL" below
-  * Add an action with callback id: `test-message-action`
+  * Add shortcuts
+    * Global shortcut - Callback ID: `test-global-shortcut`
+    * Message shortcut - Callback ID: `test-message-action`
   * Set the valid "Request URL" below for Select Menus's Options Load URL
 * **Slash Commands**
   * Add `/time`, `/test-modal`, `/test-dialog`, `/test-attachments` with the valid "Request URL" below

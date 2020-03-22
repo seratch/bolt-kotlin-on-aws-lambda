@@ -1,6 +1,6 @@
-## Bolt for Java (still in beta) runs on AWS Lambda
+## Bolt for Java runs on AWS Lambda
 
-This is a sample project for building [Bolt Java (still in beta)](https://github.com/slackapi/java-slack-sdk) apps running on AWS Lambda.
+This is a sample project for building [Bolt for Java](https://github.com/slackapi/java-slack-sdk) apps running on AWS Lambda.
 
 On your local machine, I recommend running the app with the [Quarkus](https://quarkus.io/) framework (specifically using the [quarkus-undertow](https://quarkus.io/guides/http-reference)). You'll enjoy all the benefits of [Quarkus's development mode](https://quarkus.io/guides/getting-started). 
 

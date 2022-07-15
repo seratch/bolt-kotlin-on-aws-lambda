@@ -9,7 +9,7 @@
     <properties>
         <slack.version>1.0.0</slack.version>
         <kotlin.version>1.3.70</kotlin.version>
-        <aws-sdk.version>1.11.747</aws-sdk.version>
+        <aws-sdk.version>1.12.261</aws-sdk.version>
         <quarkus.version>1.3.0.Final</quarkus.version>
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <maven.compiler.parameters>true</maven.compiler.parameters>
